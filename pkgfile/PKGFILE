@@ -1,0 +1,82 @@
+# Maintainer: Vilmar Catafesta <vcatafesta@gmail.com>
+
+pkgname=voidbr-pkgname
+pkgdesc="Package template for VoidBR"
+pkgver=$(date +%Y%m%d)
+pkgrel=$(date +%H%M)
+provides=()  # "eu SOU o $pkgname pkg1, pra quem depender deles"
+replaces=()  # "remove o pkg1 pkg2 antigo automaticamente quando eu instalar"
+conflicts=() # "nunca me deixe coexistir com o pkg1 pkg2 original"
+arch=('any')
+license=('MIT')
+#url="ssh://git@github.com/voidlinuxbr/${pkgname}"
+url="https://github.com/voidlinuxbr/${pkgname}"
+source=("git+${url}.git")
+md5sums=('SKIP')
+makedepends=()
+depends=()
+backup=()
+
+# Automatically detect and use the correct install file
+if [ -e "${pkgname}.install" ]; then
+	install=${pkgname}.install
+elif [ -e "pkgbuild.install" ]; then
+	install=pkgfile.install
+fi
+
+package() {
+	# Verify default folder
+	if [ -d "${srcdir}/${pkgname}/${pkgname}" ]; then
+		InternalDir="${srcdir}/${pkgname}/${pkgname}"
+	elif [ -d "${srcdir}/${pkgname}" ]; then
+		InternalDir="${srcdir}/${pkgname}"
+	else
+		#local
+		InternalDir="${WORKDIR}"
+	fi
+
+	cd "${InternalDir}"
+	# Copiar a estrutura de /etc, /usr e /opt para /
+	local dirs=("boot" "etc" "opt" "usr" "var")
+	for dir in "${dirs[@]}"; do
+		if [ -d "${InternalDir}/${dir}" ]; then
+			cp -a "${InternalDir}/${dir}" "${pkgdir}/"
+		fi
+	done
+
+	# Install license file if present
+	[ -f "LICENSE" ] && install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+	# Install documentation if present
+	[ -f "README.md" ] && install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+
+}
+
+pre_install() {
+	log "Iniciando instalação"
+}
+
+post_install() {
+	if [ "${update:-}" = "yes" ]; then
+		log "Finalizando upgrade"
+	else
+		log "Finalizando instalação"
+	fi
+
+	if [ -n "${MKISO_BUILD:-}" ]; then
+		echo "${YELLOW}[-]${RESET} Build de ISO detectado (MKISO_BUILD) — pulando."
+		return 0
+	fi
+
+	if [ -z "${VOIDBR_INSTALLER:-}" ]; then
+		:
+	fi
+
+}
+
+pre_upgrade() {
+	log "Iniciando upgrade"
+}
+
+post_upgrade() {
+	post_install
+}
