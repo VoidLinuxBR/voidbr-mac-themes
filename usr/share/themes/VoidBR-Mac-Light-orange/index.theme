@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=VoidBR-Mac-Light-orange
+Comment=Tema estilo macOS do VoidBR (baseado no WhiteSur, MIT)
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=VoidBR-Mac-Light-orange
+MetacityTheme=VoidBR-Mac-Light
+ButtonLayout=close,minimize,maximize:menu
